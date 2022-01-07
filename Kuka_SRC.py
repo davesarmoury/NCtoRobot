@@ -1,30 +1,15 @@
 import math
 from scipy.spatial.transform import Rotation as R
 
-out_file = None
+class KUKA_SRC(NC2Robot):
+    def __init__(self, script_name, source_name, config_name=None):
+        super().__init__(script_name, source_name, config_name)
 
-def cartesian(xin, yin, zin):
-	scale = 1.0
-	return [xin / scale, yin / scale, zin / scale]
-
-def rotation_angles(rz1, rx, rz2):
-	r = R.from_euler('ZYZ', [rz1, rx, rz2], degrees=True)
-	r2 = R.from_euler('X', 180, degrees=True)
-	r3 = r*r2
-	eul = r.as_euler('ZYX', degrees=True)
-	return eul
-
-def new_file(filename):
-	global out_file
-	if out_file != None:
+    def write_footer(self, out_file, config):
 		out_file.write("PTP {A1 20.0,A2 -100.0,A3 140.0,A4 0.0,A5 -40.0,A6 0.0} \n\n")
 		out_file.write("\nEND\n")
-		out_file.close()
 
-	if filename:
-		print("Opening " + filename + ".src")
-		out_file = open(filename + ".src", 'w')
-
+	def write_header(self, out_file, config):
 		out_file.write("&ACCESS RVP\n")
 		out_file.write("&REL 1\n")
 		out_file.write("&PARAM TEMPLATE = C:\\KRC\Roboter\\Template\\vorgabe\n")
