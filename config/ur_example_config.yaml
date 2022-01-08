@@ -1,3 +1,6 @@
 linearize: False                            # If joint motions should be linearized
 home: [20.0, -100.0, 140.0, 0.0,-40.0, 0.0] # Axis angles for home position
 feature: Frame                              # Name of the feature used to locate the part
+accel: 0.5                                  # Acceleration
+l_speed: 0.04                               # Linear Speed
+rounding: 0.001                             # Cartesian approximation

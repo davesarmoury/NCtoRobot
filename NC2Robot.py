@@ -1,6 +1,6 @@
 import math
 from scipy.spatial.transform import Rotation as R
-
+from tqdm import tqdm
 from yaml import load
 try:
     from yaml import CLoader as Loader
@@ -22,9 +22,11 @@ class NC2Robot:
         current_tool = -1
         current_path = -1
 
+        print("Writing " + filename)
         self.writeHeader(out_file)
 
-        for point in data:
+        for idx in tqdm(range(len(data)):
+            point = data[i]
             if point[8] != current_path:
                 current_path = point[8]
                 self.writePathInit(out_file, point)
@@ -123,7 +125,11 @@ class NC2Robot:
         print("Parsing " + source)
         try:
             inFile = open(source, 'r')
-            for line in inFile:
+            lines = inFile.readlines()
+            inFile.close()
+
+            for idx in tqdm(range(len(lines)):
+                line = line[idx]
                 temp = line.split(",")
                 current_data = []
                 current_data.append(int(temp[0]))   # Motion Type 0 - PTP, 1 - LIN
@@ -136,7 +142,7 @@ class NC2Robot:
                 current_data.append(int(temp[7]))   # Tool Number
                 current_data.append(int(temp[8]))   # Path Number
                 parsed_data.append(current_data)
-            inFile.close()
+
             print(str(len(parsed_data)) + " lines read")
             return parsed_data
         except Exception as e:
