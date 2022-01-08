@@ -8,23 +8,78 @@ except ImportError:
     from yaml import Loader
 
 class NC2Robot:
-    def __init__(self, script_name, source_name, config_name=None):
-        self.script_name = script_name
-        self.source_name = source_name
+    def __init__(self, config_name=None):
         self.config_name = config_name
         self.controller_config = {}
-
-        self.data_in = self.loadSource(self.source_name)
 
         if self.config_name.any():
             inFile = open(self.config_name, 'r')
             self.controller_config = load(inFile, Loader=Loader)
             inFile.close()
 
-        self.out_file = open(self.script_name, 'w')
-        self.write_header(self.out_file, self.config)
+    def writeScript(self, filename, data):
+        out_file = open(filename, 'w')
+        current_tool = -1
+        current_path = -1
 
-    def write_header(self, out_file, config):
+        self.writeHeader(out_file)
+
+        for point in data:
+            if point[8] != current_path:
+                current_path = point[8]
+                self.writePathInit(out_file, point)
+            if point[7] != current_tool:
+                current_tool = point[7]
+                self.writeToolInit(out_file, point)
+
+            if point[0] == 1 or self.controller_config.linearize:
+                self.writeLinear(out_file, point)
+            else:
+                self.writeJoint(out_file, point)
+
+        self.writeFooter(out_file)
+
+    def writeLinear(self, out_file, data):
+        '''
+        Writes a linear motion
+
+        Args:
+            out_file (file): file object to write to
+            data (list): point data
+        '''
+        pass
+
+    def writeJoint(self, out_file, data):
+        '''
+        Writes a joint motion
+
+        Args:
+            out_file (file): file object to write to
+            data (list): point data
+        '''
+        pass
+
+    def writeToolInit(self, out_file, data):
+        '''
+        Writes anything needed to transition to a new tool
+
+        Args:
+            out_file (file): file object to write to
+            data (list): point data
+        '''
+        pass
+
+    def writePathInit(self, out_file, data):
+        '''
+        Writes anything needed to transition to a new path
+
+        Args:
+            out_file (file): file object to write to
+            data (list): point data
+        '''
+        pass
+
+    def writeHeader(self, out_file):
         '''
         Writes any initial header information to the robot script
 
@@ -33,7 +88,7 @@ class NC2Robot:
         '''
         pass
 
-    def write_footer(self, out_file, config):
+    def writeFooter(self, out_file):
         '''
         Writes any final footer information to the robot script
 
@@ -110,7 +165,7 @@ class NC2Robot:
     	return eul
 
 
-    def axis_angle(self, rz1, rx, rz2, flip_vector=False):
+    def axisAngle(self, rz1, rx, rz2, flip_vector=False):
         '''
         Takes compound rZ, rY, rZ and returns tuple of axis angle.  Used for UR.  See https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation
 

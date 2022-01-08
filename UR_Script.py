@@ -2,10 +2,10 @@ import math
 from scipy.spatial.transform import Rotation as R
 
 class UR_Script(NC2Robot):
-    def __init__(self, script_name, source_name, config_name=None):
-        super().__init__(script_name, source_name, config_name)
+    def __init__(self, config_name="config/ur_example_config.yaml"):
+        super().__init__(config_name)
 
-    def write_header(self, out_file, config):
+    def writeHeader(self, out_file, config):
         out_file.write("accel=0.5\n")
         out_file.write("vel=0.04\n")
         out_file.write("round=0.001\n")

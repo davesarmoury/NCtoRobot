@@ -2,14 +2,14 @@ import math
 from scipy.spatial.transform import Rotation as R
 
 class KUKA_SRC(NC2Robot):
-    def __init__(self, script_name, source_name, config_name=None):
-        super().__init__(script_name, source_name, config_name)
+    def __init__(self, config_name="config/kuka_example_config.yaml"):
+        super().__init__(config_name)
 
-    def write_footer(self, out_file, config):
-		out_file.write("PTP {A1 20.0,A2 -100.0,A3 140.0,A4 0.0,A5 -40.0,A6 0.0} \n\n")
+    def writeFooter(self, out_file):
+		writeHome(out_file)
 		out_file.write("\nEND\n")
 
-	def write_header(self, out_file, config):
+	def writeHeader(self, out_file):
 		out_file.write("&ACCESS RVP\n")
 		out_file.write("&REL 1\n")
 		out_file.write("&PARAM TEMPLATE = C:\\KRC\Roboter\\Template\\vorgabe\n")
@@ -30,61 +30,38 @@ class KUKA_SRC(NC2Robot):
 		out_file.write("$ACC.ORI2=100\n\n")
 
 		out_file.write("FOR INDX=1 TO 6\n")
-		out_file.write("	$VEL_AXIS[INDX]=20\n")
+		out_file.write("	$VEL_AXIS[INDX]=" + str(self.controller_config.j_speed) + "\n")
 		out_file.write("ENDFOR\n")
-		out_file.write("$VEL.CP = 0.1\n\n")
+		out_file.write("$VEL.CP = " + str(self.controller_config.l_speed) + "\n\n")
 
 		#out_file.write("$IPO_MODE = #BASE\n"); # NORMAL
 		out_file.write("$IPO_MODE = #TCP\n"); # RTCP
-		out_file.write("$APO.CDIS = 0.5\n")
+		out_file.write("$APO.CDIS = " + str(self.controller_config.c_dis) + "\n")
 		out_file.write("$ADVANCE = 5\n\n")
 
-		out_file.write("$ACT_TOOL = 1\n")
-		out_file.write("$TOOL=TOOL_DATA[1]\n")
-		out_file.write("$ACT_BASE = 1\n")
-		out_file.write("$BASE=BASE_DATA[1]\n\n")
+		out_file.write("$ACT_BASE = " + str(self.controller_config.base) + "\n")
+		out_file.write("$BASE=BASE_DATA[" + str(self.controller_config.base) + "]\n\n")
 
-		out_file.write("DECL EKI_STATUS RET\n")
-		out_file.write("RET=EKI_Init(\"oxy\")\n")
-		out_file.write("RET=EKI_Open(\"oxy\")\n\n")
+        writeHome(out_file)
 
-		out_file.write("PTP {A1 20.0,A2 -100.0,A3 140.0,A4 0.0,A5 -40.0,A6 0.0} \n\n")
+    def writeHome(self, out_file):
+		out_file.write("PTP {A1 " + str(self.controller_config.home[0]))
+        out_file.write(",A2 " + str(self.controller_config.home[1]))
+        out_file.write(",A3 " + str(self.controller_config.home[2]))
+        out_file.write(",A4 " + str(self.controller_config.home[3]))
+        out_file.write(",A5 " + str(self.controller_config.home[4]))
+        out_file.write(",A6  " + str(self.controller_config.home[5]) + "}\n\n")
 
-def krc_src(filename):
-	global out_file
+    def writeLinear(self, out_file, data):
+        angles = rotation_angles(float(data[4]),float(data[5]),0.0)
+        positions = cartesian(float(data[1]),float(data[2]),float(data[3]))
+        out_file.write("LIN {X " + str("%1.3f" % positions[0]) + ",Y " + str("%1.3f" % positions[1]) + ",Z " + str("%1.3f" % positions[2]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "} C_DIS\n")
 
-	print("Working on " + filename)
-	path_num = 0
-	in_file = open(filename + ".path", 'r')
-	points = 0
-	last_move = "XX"
-	for line in in_file:
-		if "StartHeader" in line:
-			path_num = path_num + 1
-			new_file(filename + "_" + str(path_num))
-		data = line.split(",")
-		if len(data) == 7:
-			angles = rotation_angles(float(data[4]),float(data[5]),0.0)
-			positions = cartesian(float(data[1]),float(data[2]),float(data[3]))
+    def writeJoint(self, out_file, data):
+        angles = rotation_angles(float(data[4]),float(data[5]),0.0)
+        positions = cartesian(float(data[1]),float(data[2]),float(data[3]))
+        out_file.write("PTP {X " + str("%1.3f" % positions[0]) + ",Y " + str("%1.3f" % positions[1]) + ",Z " + str("%1.3f" % positions[2]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "}\n")
 
-			if data[0] == "0":
-				if last_move == "1":
-					out_file.write("RET=EKI_SetBool(\"oxy\",\"torchState\",FALSE)\n")
-					out_file.write("RET = EKI_Send(\"oxy\",\"torchState\")\n")
-				out_file.write("PTP {X " + str("%1.3f" % positions[0]) + ",Y " + str("%1.3f" % positions[1]) + ",Z " + str("%1.3f" % positions[2]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "}\n")
-			else:
-				if last_move == "0":
-					out_file.write("WAIT SEC 2\n")
-					out_file.write("RET=EKI_SetBool(\"oxy\",\"torchState\",TRUE)\n")
-					out_file.write("RET = EKI_Send(\"oxy\",\"torchState\")\n")
-				out_file.write("LIN {X " + str("%1.3f" % positions[0]) + ",Y " + str("%1.3f" % positions[1]) + ",Z " + str("%1.3f" % positions[2]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "} C_DIS\n")
-
-			last_move = data[0]
-			points = points + 1
-
-	in_file.close()
-	new_file(None)
-	print("Done")
-	print("Processed " + str(points) + " points")
-
-krc_src("firepit")
+    def writeToolInit(self, out_file, data):
+		out_file.write("\n$ACT_TOOL = " + str(data[7]) + "\n")
+		out_file.write("$TOOL=TOOL_DATA[" + str(data[7]) + "]\n\n")
