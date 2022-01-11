@@ -4,3 +4,4 @@ l_speed: 0.1                                # Linear speed override.  Needed for
 home: [20.0, -100.0, 140.0, 0.0,-40.0, 0.0] # Axis angles for home position
 base: 1                                     # Base frame number
 c_dis: 0.5                                  # Cartesian rounding in mm
+rtcp: False                                 # Remote Tool Center Point

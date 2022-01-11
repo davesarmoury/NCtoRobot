@@ -1,6 +1,6 @@
-from NC2Robot import NC2Robot
+from NCtoRobot import NCtoRobot
 
-class UR_Script(NC2Robot):
+class UR_Script(NCtoRobot):
     def __init__(self, config_name="config/ur_example_config.yaml"):
         super().__init__(config_name)
 
