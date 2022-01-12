@@ -7,17 +7,21 @@ try:
 except ImportError:
     from yaml import Loader
 
-class NC2Robot:
+class NCtoRobot:
     def __init__(self, config_name=None):
         self.config_name = config_name
         self.controller_config = {}
 
-        if self.config_name.any():
+        if self.config_name:
             inFile = open(self.config_name, 'r')
             self.controller_config = load(inFile, Loader=Loader)
             inFile.close()
 
-    def writeScript(self, filename, data):
+    def writeScript(self, filename, rotation, data):
+        self.program_config = {}
+        self.program_config["filename"] = filename
+        self.program_config["rotation"] = rotation
+
         out_file = open(filename, 'w')
         current_tool = -1
         current_path = -1
@@ -25,8 +29,8 @@ class NC2Robot:
         print("Writing " + filename)
         self.writeHeader(out_file)
 
-        for idx in tqdm(range(len(data)):
-            point = data[i]
+        for idx in tqdm(range(len(data))):
+            point = data[idx]
             if point[8] != current_path:
                 current_path = point[8]
                 self.writePathInit(out_file, point)
@@ -34,7 +38,7 @@ class NC2Robot:
                 current_tool = point[7]
                 self.writeToolInit(out_file, point)
 
-            if point[0] == 1 or self.controller_config.linearize:
+            if point[0] == 1 or self.controller_config["linearize"]:
                 self.writeLinear(out_file, point)
             else:
                 self.writeJoint(out_file, point)
@@ -128,8 +132,8 @@ class NC2Robot:
             lines = inFile.readlines()
             inFile.close()
 
-            for idx in tqdm(range(len(lines)):
-                line = line[idx]
+            for idx in tqdm(range(len(lines))):
+                line = lines[idx]
                 temp = line.split(",")
                 current_data = []
                 current_data.append(int(temp[0]))   # Motion Type 0 - PTP, 1 - LIN
@@ -163,12 +167,12 @@ class NC2Robot:
         Returns:
             tuple: A tuple of compound rotation angles
         '''
-    	r = R.from_euler('ZYZ', [rz1, rx, rz2], degrees=True)
-    	if flip_vector:
+        r = R.from_euler('ZYZ', [rz1, rx, rz2], degrees=True)
+        if flip_vector:
             r2 = R.from_euler('X', 180, degrees=True)
-    	    r = r*r2
-    	eul = r.as_euler('ZYX', degrees=True)
-    	return eul
+            r = r*r2
+        eul = r.as_euler('ZYX', degrees=True)
+        return eul
 
 
     def axisAngle(self, rz1, rx, rz2, flip_vector=False):
@@ -185,8 +189,8 @@ class NC2Robot:
             tuple: A tuple for axis angle
         '''
         r = R.from_euler('ZYZ', [rz1, rx, rz2], degrees=True)
-    	if flip_vector:
+        if flip_vector:
             r2 = R.from_euler('X', 180, degrees=True)
-    	    r = r*r2
+            r = r*r2
         rv = r.as_rotvec()
         return rv
