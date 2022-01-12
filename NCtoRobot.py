@@ -45,6 +45,56 @@ class NCtoRobot:
 
         self.writeFooter(out_file)
 
+    def loadSource(self, source):
+        '''
+        Loads the source script.  Converts all values to usable data.  Each line of the source file must have the format:
+        Motion Type,X,Y,Z,rZ,rY,Speed,Tool,Path
+
+        Motion Type 0 - PTP, 1 - LIN
+        X in mm
+        Y in mm
+        Z in mm
+        rZ in degrees
+        rY in degrees (new y)
+        Travel speed in mm/s
+        Tool Number
+        Path Number
+
+        Args:
+            source (string): Path to source file
+
+        Returns:
+            list: A list of all parsed points.  Each point is a list of its data
+        '''
+
+        parsed_data = []
+        print("Parsing " + source)
+        try:
+            inFile = open(source, 'r')
+            lines = inFile.readlines()
+            inFile.close()
+
+            for idx in tqdm(range(len(lines))):
+                line = lines[idx]
+                temp = line.split(",")
+                current_data = []
+                current_data.append(int(temp[0]))   # Motion Type 0 - PTP, 1 - LIN
+                current_data.append(float(temp[1])) # X in mm
+                current_data.append(float(temp[2])) # Y in mm
+                current_data.append(float(temp[3])) # Z in mm
+                current_data.append(float(temp[4])) # rZ in degrees
+                current_data.append(float(temp[5])) # rY in degrees (new y)
+                current_data.append(float(temp[6])) # Travel speed in mm/s
+                current_data.append(int(temp[7]))   # Tool Number
+                current_data.append(int(temp[8]))   # Path Number
+                parsed_data.append(current_data)
+
+            print(str(len(parsed_data)) + " lines read")
+            return parsed_data
+        except Exception as e:
+            print(e)
+            return None
+
     def writeLinear(self, out_file, data):
         '''
         Writes a linear motion
@@ -102,56 +152,6 @@ class NCtoRobot:
             out_file (file): file object to write to
         '''
         pass
-
-    def loadSource(self, source):
-        '''
-        Loads the source script.  Converts all values to usable data.  Each line of the source file must have the format:
-        Motion Type,X,Y,Z,rZ,rY,Speed,Tool,Path
-
-        Motion Type 0 - PTP, 1 - LIN
-        X in mm
-        Y in mm
-        Z in mm
-        rZ in degrees
-        rY in degrees (new y)
-        Travel speed in mm/s
-        Tool Number
-        Path Number
-
-        Args:
-            source (string): Path to source file
-
-        Returns:
-            list: A list of all parsed points.  Each point is a list of its data
-        '''
-
-        parsed_data = []
-        print("Parsing " + source)
-        try:
-            inFile = open(source, 'r')
-            lines = inFile.readlines()
-            inFile.close()
-
-            for idx in tqdm(range(len(lines))):
-                line = lines[idx]
-                temp = line.split(",")
-                current_data = []
-                current_data.append(int(temp[0]))   # Motion Type 0 - PTP, 1 - LIN
-                current_data.append(float(temp[1])) # X in mm
-                current_data.append(float(temp[2])) # Y in mm
-                current_data.append(float(temp[3])) # Z in mm
-                current_data.append(float(temp[4])) # rZ in degrees
-                current_data.append(float(temp[5])) # rY in degrees (new y)
-                current_data.append(float(temp[6])) # Travel speed in mm/s
-                current_data.append(int(temp[7]))   # Tool Number
-                current_data.append(int(temp[8]))   # Path Number
-                parsed_data.append(current_data)
-
-            print(str(len(parsed_data)) + " lines read")
-            return parsed_data
-        except Exception as e:
-            print(e)
-            return None
 
     def rotation_angles(self, rz1, rx, rz2, degrees=True, flip_vector=False):
         '''
