@@ -12,12 +12,16 @@ class NCtoRobot:
         self.config_name = config_name
         self.controller_config = {}
 
-        if self.config_name.any():
+        if self.config_name:
             inFile = open(self.config_name, 'r')
             self.controller_config = load(inFile, Loader=Loader)
             inFile.close()
 
-    def writeScript(self, filename, data):
+    def writeScript(self, filename, rotation, data):
+        self.program_config = {}
+        self.program_config["filename"] = filename
+        self.program_config["rotation"] = rotation
+
         out_file = open(filename, 'w')
         current_tool = -1
         current_path = -1
@@ -26,7 +30,7 @@ class NCtoRobot:
         self.writeHeader(out_file)
 
         for idx in tqdm(range(len(data))):
-            point = data[i]
+            point = data[idx]
             if point[8] != current_path:
                 current_path = point[8]
                 self.writePathInit(out_file, point)
@@ -34,7 +38,7 @@ class NCtoRobot:
                 current_tool = point[7]
                 self.writeToolInit(out_file, point)
 
-            if point[0] == 1 or self.controller_config.linearize:
+            if point[0] == 1 or self.controller_config["linearize"]:
                 self.writeLinear(out_file, point)
             else:
                 self.writeJoint(out_file, point)
@@ -129,7 +133,7 @@ class NCtoRobot:
             inFile.close()
 
             for idx in tqdm(range(len(lines))):
-                line = line[idx]
+                line = lines[idx]
                 temp = line.split(",")
                 current_data = []
                 current_data.append(int(temp[0]))   # Motion Type 0 - PTP, 1 - LIN
