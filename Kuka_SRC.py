@@ -14,14 +14,10 @@ class Kuka_Src(NCtoRobot):
         out_file.write("&PARAM TEMPLATE = C:\\KRC\Roboter\\Template\\vorgabe\n")
         out_file.write("&PARAM EDITMASK = *\n")
 
-        out_file.write("DEF " + self.program_config["filename"] + "( )\n")
+        out_file.write("DEF " + self.program_config["program_name"] + "( )\n")
 
-        out_file.write("EXT BAS (BAS_COMMAND :IN,REAL :IN )\n\n")
-
-        out_file.write("INT INDX\n")
-        out_file.write("FOR INDX=1 TO 6\n")
-        out_file.write("	$ACC_AXIS[INDX]=50\n")
-        out_file.write("ENDFOR\n\n")
+        out_file.write("EXT BAS (BAS_COMMAND :IN,REAL :IN )\n")
+        out_file.write("INT INDX\n\n")
 
         out_file.write("$VEL.ORI1=200\n")
         out_file.write("$VEL.ORI2=200\n")
@@ -30,14 +26,18 @@ class Kuka_Src(NCtoRobot):
 
         out_file.write("FOR INDX=1 TO 6\n")
         out_file.write("	$VEL_AXIS[INDX]=" + str(self.controller_config["j_speed"]) + "\n")
-        out_file.write("ENDFOR\n")
-        out_file.write("$VEL.CP = " + str(self.controller_config["l_speed"]) + "\n\n")
+        out_file.write("	$ACC_AXIS[INDX]=" + str(self.controller_config["j_accel"]) + "\n")
+        out_file.write("ENDFOR\n\n")
+
+        out_file.write("$VEL.CP = " + str(self.controller_config["l_speed"]) + "\n")
+        out_file.write("$ACC.CP = " + str(self.controller_config["l_accel"]) + "\n\n")
 
         if self.controller_config["rtcp"]:
             out_file.write("$IPO_MODE = #TCP\n"); # RTCP
         else:
             out_file.write("$IPO_MODE = #BASE\n"); # NORMAL
         out_file.write("$APO.CDIS = " + str(self.controller_config["c_dis"]) + "\n")
+        out_file.write("$APO.CPTP = 0\n")
         out_file.write("$ADVANCE = 5\n\n")
 
         out_file.write("$ACT_BASE = " + str(self.controller_config["base"]) + "\n")

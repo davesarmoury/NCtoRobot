@@ -2,6 +2,8 @@ import math
 from scipy.spatial.transform import Rotation as R
 from tqdm import tqdm
 from yaml import load
+import os
+
 try:
     from yaml import CLoader as Loader
 except ImportError:
@@ -19,6 +21,14 @@ class NCtoRobot:
 
     def writeScript(self, filename, rotation, data):
         self.program_config = {}
+        
+        fn = os.path.split(filename)
+        pn = fn[1]
+        if "." in pn:
+            pn = pn[0:pn.index(".")]
+
+        self.program_config["dir"] = fn[0]
+        self.program_config["program_name"] = pn
         self.program_config["filename"] = filename
         self.program_config["rotation"] = rotation
 

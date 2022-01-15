@@ -1,6 +1,11 @@
 linearize: False                            # If joint motions should be linearized
+
 j_speed: 10                                 # Joint motion percentage
+j_accel: 50                                 # Joint acceleration percentage
+
 l_speed: 0.1                                # Linear speed override.  Needed for now
+l_accel: 5.0                                # Linear acceleration
+
 home: [20.0, -100.0, 140.0, 0.0,-40.0, 0.0] # Axis angles for home position
 base: 1                                     # Base frame number
 c_dis: 0.5                                  # Cartesian rounding in mm
