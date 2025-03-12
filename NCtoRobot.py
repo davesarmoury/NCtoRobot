@@ -19,31 +19,45 @@ class NCtoRobot:
             self.controller_config = load(inFile, Loader=Loader)
             inFile.close()
 
-    def writeScript(self, filename, rotation, data):
+    def writeScript(self, program_name, extension, rotation, data, path_split=False):
         self.program_config = {}
-        
-        fn = os.path.split(filename)
-        pn = fn[1]
-        if "." in pn:
-            pn = pn[0:pn.index(".")]
 
-        self.program_config["dir"] = fn[0]
-        self.program_config["program_name"] = pn
-        self.program_config["filename"] = filename
+        self.program_config["orig_program_name"] = program_name
+        self.program_config["program_name"] = program_name
+        self.program_config["extension"] = extension
         self.program_config["rotation"] = rotation
+        self.program_config["split"] = path_split
 
-        out_file = open(filename, 'w')
         current_tool = -1
         current_path = -1
 
-        print("Writing " + filename)
-        self.writeHeader(out_file)
+        file_started = False
+        out_file = None
 
         for idx in tqdm(range(len(data))):
             point = data[idx]
             if point[8] != current_path:
-                current_path = point[8]
+                current_path = int(point[8])
+
+                if file_started and self.program_config["split"]:
+                    self.writeFooter(out_file)
+                    file_started = False
+
+        
+                if not file_started:
+                    if self.program_config["split"]:
+                        self.program_config["program_name"] = program_name + str(current_path)
+                        filename = program_name + str(current_path) + "." + extension
+                    else:
+                        filename = program_name + "." + extension
+
+                    out_file = open(filename, 'w')
+                    print("Writing " + filename)
+                    self.writeHeader(out_file)
+                    file_started = True
+
                 self.writePathInit(out_file, point)
+                
             if point[7] != current_tool:
                 current_tool = point[7]
                 self.writeToolInit(out_file, point)

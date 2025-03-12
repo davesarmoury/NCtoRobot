@@ -36,6 +36,7 @@ class Kuka_Src(NCtoRobot):
             out_file.write("$IPO_MODE = #TCP\n"); # RTCP
         else:
             out_file.write("$IPO_MODE = #BASE\n"); # NORMAL
+            
         out_file.write("$APO.CDIS = " + str(self.controller_config["c_dis"]) + "\n")
         out_file.write("$APO.CPTP = 0\n")
         out_file.write("$ADVANCE = 5\n\n")
@@ -54,11 +55,11 @@ class Kuka_Src(NCtoRobot):
         out_file.write(",A6  " + str(self.controller_config["home"][5]) + "}\n\n")
 
     def writeLinear(self, out_file, data):
-        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]))
+        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]), True, self.controller_config["rtcp"])
         out_file.write("LIN {X " + str("%1.3f" % data[1]) + ",Y " + str("%1.3f" % data[2]) + ",Z " + str("%1.3f" % data[3]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "} C_DIS\n")
 
     def writeJoint(self, out_file, data):
-        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]))
+        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]), True, self.controller_config["rtcp"])
         out_file.write("PTP {X " + str("%1.3f" % data[1]) + ",Y " + str("%1.3f" % data[2]) + ",Z " + str("%1.3f" % data[3]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "}\n")
 
     def writeToolInit(self, out_file, data):
