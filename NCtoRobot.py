@@ -36,6 +36,10 @@ class NCtoRobot:
 
         for idx in tqdm(range(len(data))):
             point = data[idx]
+
+            if self.controller_config["tool"] != -1:
+                point[7] = int(self.controller_config["tool"])
+                
             if point[8] != current_path:
                 current_path = int(point[8])
 

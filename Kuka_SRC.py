@@ -17,6 +17,8 @@ class Kuka_Src(NCtoRobot):
         out_file.write("DEF " + self.program_config["program_name"] + "( )\n")
 
         out_file.write("EXT BAS (BAS_COMMAND :IN,REAL :IN )\n")
+        out_file.write("BAS (#INITMOV, 0)\n")
+
         out_file.write("INT INDX\n\n")
 
         out_file.write("$VEL.ORI1=200\n")
@@ -39,6 +41,8 @@ class Kuka_Src(NCtoRobot):
             
         out_file.write("$APO.CDIS = " + str(self.controller_config["c_dis"]) + "\n")
         out_file.write("$APO.CPTP = 0\n")
+        out_file.write("$ORI_TYPE = #VAR\n")
+
         out_file.write("$ADVANCE = 5\n\n")
 
         out_file.write("$ACT_BASE = " + str(self.controller_config["base"]) + "\n")
