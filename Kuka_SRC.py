@@ -3,6 +3,8 @@ from NCtoRobot.NCtoRobot import NCtoRobot
 class Kuka_Src(NCtoRobot):
     def __init__(self, config_name=None):
         super().__init__(config_name)
+        print("Initializing Kuka SRC ")
+
 
     def writeFooter(self, out_file):
         self.writeHome(out_file)
@@ -17,9 +19,9 @@ class Kuka_Src(NCtoRobot):
         out_file.write("DEF " + self.program_config["program_name"] + "( )\n")
 
         out_file.write("EXT BAS (BAS_COMMAND :IN,REAL :IN )\n")
-        out_file.write("BAS (#INITMOV, 0)\n")
+        out_file.write("INT INDX\n")
 
-        out_file.write("INT INDX\n\n")
+        out_file.write("BAS (#INITMOV, 0)\n\n")
 
         out_file.write("$VEL.ORI1=200\n")
         out_file.write("$VEL.ORI2=200\n")
@@ -59,11 +61,11 @@ class Kuka_Src(NCtoRobot):
         out_file.write(",A6  " + str(self.controller_config["home"][5]) + "}\n\n")
 
     def writeLinear(self, out_file, data):
-        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]), True, self.controller_config["rtcp"])
+        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]), True, self.controller_config["z_out"])
         out_file.write("LIN {X " + str("%1.3f" % data[1]) + ",Y " + str("%1.3f" % data[2]) + ",Z " + str("%1.3f" % data[3]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "} C_DIS\n")
 
     def writeJoint(self, out_file, data):
-        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]), True, self.controller_config["rtcp"])
+        angles = self.rotation_angles(float(data[4]),float(data[5]),float(self.program_config["rotation"]), True, self.controller_config["z_out"])
         out_file.write("PTP {X " + str("%1.3f" % data[1]) + ",Y " + str("%1.3f" % data[2]) + ",Z " + str("%1.3f" % data[3]) + ",A " + str("%1.3f" % angles[0]) + ",B " + str("%1.3f" % angles[1]) + ",C " + str("%1.3f" % angles[2]) + "}\n")
 
     def writeToolInit(self, out_file, data):

@@ -4,3 +4,4 @@ feature: Frame                              # Name of the feature used to locate
 accel: 0.5                                  # Acceleration
 l_speed: 0.04                               # Linear Speed
 rounding: 0.001                             # Cartesian approximation
+tool: -1                                    # Set to a number other than -1 to override tool nnumber

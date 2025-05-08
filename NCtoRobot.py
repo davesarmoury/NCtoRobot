@@ -39,15 +39,15 @@ class NCtoRobot:
 
             if self.controller_config["tool"] != -1:
                 point[7] = int(self.controller_config["tool"])
-                
+
             if point[8] != current_path:
                 current_path = int(point[8])
 
                 if file_started and self.program_config["split"]:
                     self.writeFooter(out_file)
+                    out_file.close()
                     file_started = False
 
-        
                 if not file_started:
                     if self.program_config["split"]:
                         self.program_config["program_name"] = program_name + str(current_path)
@@ -61,7 +61,7 @@ class NCtoRobot:
                     file_started = True
 
                 self.writePathInit(out_file, point)
-                
+
             if point[7] != current_tool:
                 current_tool = point[7]
                 self.writeToolInit(out_file, point)
@@ -72,6 +72,9 @@ class NCtoRobot:
                 self.writeJoint(out_file, point)
 
         self.writeFooter(out_file)
+        print("Closing " + filename)
+
+        out_file.close()
 
     def loadSource(self, source):
         '''
@@ -199,7 +202,7 @@ class NCtoRobot:
         if flip_vector:
             r2 = R.from_euler('X', 180, degrees=True)
             r = r*r2
-        eul = r.as_euler('ZYX', degrees=True)
+        eul = r.as_euler('ZYX', degrees=degrees)
         return eul
 
 
